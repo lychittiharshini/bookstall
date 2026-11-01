@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useShop } from '../context/ShopContext';
 import {
-  signInAdminWithGoogle,
-  logoutAdmin,
   db,
   handleFirestoreError,
   OperationType,
@@ -45,6 +43,10 @@ import {
   Star,
   Loader2,
   ExternalLink,
+  User as UserIcon,
+  Lock,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 type AdminTab =
@@ -59,8 +61,10 @@ type AdminTab =
 
 export const AdminDashboard: React.FC = () => {
   const {
-    user,
     isAdmin,
+    adminUsername,
+    loginAdmin,
+    logoutAdminUser,
     shopSettings,
     updateShopSettings,
     setActiveView,
@@ -75,7 +79,10 @@ export const AdminDashboard: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<AdminTab>('gallery');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [inputUsername, setInputUsername] = useState('harshinilychitti');
+  const [inputPassword, setInputPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   // File upload state for Gallery
@@ -108,39 +115,23 @@ export const AdminDashboard: React.FC = () => {
     setTimeout(() => setActionSuccess(null), 3000);
   };
 
-  const handleGoogleLogin = async () => {
-    if (isLoggingIn) return;
-    setIsLoggingIn(true);
+  const handleCredentialLogin = (e: React.FormEvent) => {
+    e.preventDefault();
     setAuthError(null);
-    try {
-      await signInAdminWithGoogle();
-      showSuccess('Authenticated successfully!');
-    } catch (err: any) {
-      console.warn('Admin Google Sign-in note:', err);
-      const code = err?.code || '';
-      if (code === 'auth/cancelled-popup-request') {
-        setAuthError(
-          'Sign-in was interrupted because the popup was closed or clicked multiple times. Please click "Sign in with Google Admin" once to try again.'
-        );
-      } else if (code === 'auth/popup-closed-by-user') {
-        setAuthError('The Google sign-in popup was closed before completing. Click below to try again.');
-      } else if (code === 'auth/popup-blocked') {
-        setAuthError('The sign-in popup was blocked by your browser. Please allow popups for this site or open in a new window.');
-      } else {
-        setAuthError(err?.message || 'Login failed. Please check your connection and try again.');
-      }
-    } finally {
-      setIsLoggingIn(false);
+    setIsSubmitting(true);
+
+    const success = loginAdmin(inputUsername, inputPassword);
+    if (success) {
+      showSuccess('Welcome to Admin Portal!');
+      setInputPassword('');
+    } else {
+      setAuthError('Incorrect username or password. Please verify your credentials.');
     }
+    setIsSubmitting(false);
   };
 
-  const handleLogout = async () => {
-    await logoutAdmin();
-    setActiveView('home');
-  };
-
-  const handleOpenInNewWindow = () => {
-    window.open(window.location.href, '_blank', 'noopener,noreferrer');
+  const handleLogout = () => {
+    logoutAdminUser();
   };
 
   // -------------------------------------------------------------
@@ -384,114 +375,92 @@ export const AdminDashboard: React.FC = () => {
   };
 
   // IF NOT LOGGED IN OR NOT ADMIN
-  if (!user || !isAdmin) {
+  // IF NOT ADMIN: SHOW USERNAME & PASSWORD LOGIN FORM
+  if (!isAdmin) {
     return (
       <div className="bg-[#480000] min-h-screen py-16 px-4 flex items-center justify-center text-amber-50">
         <div className="max-w-md w-full bg-[#FFFDF9] text-[#2D1810] rounded-3xl p-8 border-2 border-[#D4AF37] shadow-2xl space-y-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[#580000] text-[#FFDF73] flex items-center justify-center mx-auto shadow-md">
-            <ShieldAlert className="w-8 h-8" />
+          <div className="w-16 h-16 rounded-2xl bg-[#580000] text-[#FFDF73] flex items-center justify-center mx-auto shadow-md border border-[#D4AF37]/50">
+            <Lock className="w-8 h-8 text-[#FFDF73]" />
           </div>
 
           <div>
-            <h1 className="text-2xl font-black text-[#580000] font-['Cinzel']">
+            <h1 className="text-2xl font-black text-[#580000] font-['Cinzel'] tracking-wide">
               Shop Admin Portal
             </h1>
-            <p className="text-xs text-[#704938] mt-1">
+            <p className="text-xs text-[#704938] mt-1 font-medium">
               Sree Durga Mata Stationery • Book Stall & Fancy Items
             </p>
           </div>
 
-          {/* User signed in with non-admin email */}
-          {user && !isAdmin && (
-            <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl text-left space-y-2">
-              <p className="text-xs font-bold text-amber-900">
-                Signed in as: <span className="font-mono text-amber-800">{user.email}</span>
-              </p>
-              <p className="text-xs text-amber-800 leading-relaxed">
-                This Google account is not configured with administrator access. Please sign in with the authorized owner email (<span className="font-semibold text-amber-950">harshinisree72@gmail.com</span>).
-              </p>
-            </div>
-          )}
-
-          {/* Auth Error Banner with Actionable Advice */}
           {authError && (
-            <div className="p-3.5 bg-red-50 border border-red-300 rounded-xl text-red-800 text-xs text-left leading-relaxed font-medium space-y-1">
-              <div className="font-bold text-red-900 flex items-center gap-1.5">
-                <ShieldAlert className="w-4 h-4 flex-shrink-0 text-red-600" />
-                <span>Sign-In Notice</span>
-              </div>
-              <p>{authError}</p>
+            <div className="p-3 bg-red-50 border border-red-300 rounded-xl text-red-800 text-xs text-left font-semibold flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 flex-shrink-0 text-red-600" />
+              <span>{authError}</span>
             </div>
           )}
 
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={handleGoogleLogin}
-              disabled={isLoggingIn}
-              className={`w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-black text-sm shadow-md transition border border-[#D4AF37] ${
-                isLoggingIn
-                  ? 'bg-[#700000] text-[#FFDF73]/70 cursor-not-allowed opacity-80'
-                  : 'bg-[#580000] hover:bg-[#400000] text-[#FFDF73]'
-              }`}
-            >
-              {isLoggingIn ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#FFDF73]" />
-                  <span>Opening Sign-In Window...</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path
-                      fill="#EA4335"
-                      d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"
-                    />
-                    <path
-                      fill="#4285F4"
-                      d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"
-                    />
-                    <path
-                      fill="#FBBC05"
-                      d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"
-                    />
-                    <path
-                      fill="#34A853"
-                      d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"
-                    />
-                  </svg>
-                  <span>{user ? 'Switch / Sign In with Admin Email' : 'Sign in with Google Admin'}</span>
-                </>
-              )}
-            </button>
-
-            {/* Helper to open in dedicated window/tab if preview iframe restricts popups */}
-            <button
-              onClick={handleOpenInNewWindow}
-              type="button"
-              className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-[#580000] text-xs font-bold border border-[#D4AF37]/50 transition"
-              title="Open full page in a new tab if iframe blocks sign-in"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-[#580000]" />
-              <span>Open in New Tab for Sign-In</span>
-            </button>
-
-            {user && (
-              <button
-                onClick={handleLogout}
-                className="w-full text-xs font-semibold text-gray-600 hover:text-black py-1"
-              >
-                Sign Out Current Account
-              </button>
-            )}
-
-            <div className="pt-2">
-              <button
-                onClick={() => setActiveView('home')}
-                className="text-xs font-bold text-[#800000] hover:underline"
-              >
-                ← Return to Public Store
-              </button>
+          <form onSubmit={handleCredentialLogin} className="space-y-4 text-left">
+            <div>
+              <label className="block text-xs font-bold text-[#580000] uppercase tracking-wider mb-1.5">
+                Username
+              </label>
+              <div className="relative">
+                <UserIcon className="w-4 h-4 text-[#8C6D58] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={inputUsername}
+                  onChange={(e) => setInputUsername(e.target.value)}
+                  placeholder="Enter admin username"
+                  autoComplete="username"
+                  required
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#D4AF37]/60 bg-white text-[#2D1810] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#580000] focus:border-transparent transition"
+                />
+              </div>
             </div>
+
+            <div>
+              <label className="block text-xs font-bold text-[#580000] uppercase tracking-wider mb-1.5">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-[#8C6D58] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={inputPassword}
+                  onChange={(e) => setInputPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  autoComplete="current-password"
+                  required
+                  className="w-full pl-10 pr-11 py-3 rounded-xl border border-[#D4AF37]/60 bg-white text-[#2D1810] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#580000] focus:border-transparent transition"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8C6D58] hover:text-[#580000] p-1 cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-3.5 px-4 rounded-xl bg-[#580000] hover:bg-[#400000] text-[#FFDF73] font-black text-sm shadow-md transition border border-[#D4AF37] flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99]"
+            >
+              <span>Login to Admin Portal</span>
+            </button>
+          </form>
+
+          <div className="pt-2">
+            <button
+              onClick={() => setActiveView('home')}
+              className="text-xs font-bold text-[#800000] hover:underline"
+            >
+              ← Return to Public Store
+            </button>
           </div>
         </div>
       </div>
@@ -517,13 +486,15 @@ export const AdminDashboard: React.FC = () => {
                 Admin
               </span>
             </h1>
-            <p className="text-[10px] text-amber-200/80">{user.email}</p>
+            <p className="text-[10px] text-amber-200/80 font-mono">
+              Admin: {adminUsername || 'harshinilychitti'}
+            </p>
           </div>
         </div>
 
         <button
           onClick={handleLogout}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#400000] hover:bg-[#300000] text-amber-200 text-xs font-bold border border-amber-600/40 transition"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#400000] hover:bg-[#300000] text-amber-200 text-xs font-bold border border-amber-600/40 transition cursor-pointer"
         >
           <LogOut className="w-3.5 h-3.5" />
           <span>Logout</span>

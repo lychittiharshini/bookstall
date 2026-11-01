@@ -80,6 +80,9 @@ interface ShopContextType {
   user: User | null;
   isAdmin: boolean;
   isAuthLoading: boolean;
+  adminUsername: string | null;
+  loginAdmin: (user: string, pass: string) => boolean;
+  logoutAdminUser: () => void;
 
   // Last Placed Order
   lastOrder: Order | null;
@@ -136,8 +139,33 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Auth & Admin State
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
+    return sessionStorage.getItem('sdm_admin_authenticated') === 'true';
+  });
+  const [adminUsername, setAdminUsername] = useState<string | null>(() => {
+    return sessionStorage.getItem('sdm_admin_user') || (sessionStorage.getItem('sdm_admin_authenticated') === 'true' ? 'harshinilychitti' : null);
+  });
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+
+  const loginAdmin = (enteredUser: string, enteredPass: string): boolean => {
+    const cleanUser = enteredUser.trim();
+    if (cleanUser === 'harshinilychitti' && enteredPass === 'harshini@8019') {
+      setIsAdmin(true);
+      setAdminUsername('harshinilychitti');
+      sessionStorage.setItem('sdm_admin_authenticated', 'true');
+      sessionStorage.setItem('sdm_admin_user', 'harshinilychitti');
+      return true;
+    }
+    return false;
+  };
+
+  const logoutAdminUser = () => {
+    setIsAdmin(false);
+    setAdminUsername(null);
+    sessionStorage.removeItem('sdm_admin_authenticated');
+    sessionStorage.removeItem('sdm_admin_user');
+    setActiveView('home');
+  };
 
   // Sync cart to local storage
   useEffect(() => {
@@ -148,28 +176,17 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [cart]);
 
-  // Auth Listener
+  // Optional background Firebase Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // Check if admin: either matches email or exists in admins collection
         const isHarshini = currentUser.email === 'harshinisree72@gmail.com';
         const isShopOwner = currentUser.email === 'sreedurgamathabookstall@gmail.com';
         if (isHarshini || isShopOwner) {
           setIsAdmin(true);
-        } else {
-          try {
-            const adminDoc = await getDoc(doc(db, 'admins', currentUser.uid));
-            setIsAdmin(adminDoc.exists());
-          } catch {
-            setIsAdmin(false);
-          }
         }
-      } else {
-        setIsAdmin(false);
       }
-      setIsAuthLoading(false);
     });
 
     return () => unsubscribe();
@@ -437,6 +454,9 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAdmin,
         isAuthLoading,
+        adminUsername,
+        loginAdmin,
+        logoutAdminUser,
         lastOrder,
         setLastOrder,
         refreshAllData: loadAllData,
