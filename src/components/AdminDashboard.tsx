@@ -79,7 +79,7 @@ export const AdminDashboard: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<AdminTab>('gallery');
   const [authError, setAuthError] = useState<string | null>(null);
-  const [inputUsername, setInputUsername] = useState('harshinilychitti');
+  const [inputUsername, setInputUsername] = useState('');
   const [inputPassword, setInputPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -411,8 +411,9 @@ export const AdminDashboard: React.FC = () => {
                   type="text"
                   value={inputUsername}
                   onChange={(e) => setInputUsername(e.target.value)}
-                  placeholder="Enter admin username"
-                  autoComplete="username"
+                  placeholder="Enter your username"
+                  autoComplete="off"
+                  data-lpignore="true"
                   required
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-[#D4AF37]/60 bg-white text-[#2D1810] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#580000] focus:border-transparent transition"
                 />
@@ -429,8 +430,9 @@ export const AdminDashboard: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={inputPassword}
                   onChange={(e) => setInputPassword(e.target.value)}
-                  placeholder="Enter admin password"
-                  autoComplete="current-password"
+                  placeholder="Enter your password"
+                  autoComplete="off"
+                  data-lpignore="true"
                   required
                   className="w-full pl-10 pr-11 py-3 rounded-xl border border-[#D4AF37]/60 bg-white text-[#2D1810] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#580000] focus:border-transparent transition"
                 />

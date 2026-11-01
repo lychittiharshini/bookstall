@@ -137,14 +137,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  // Auth & Admin State
+  // Auth & Admin State (Requires manual login)
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean>(() => {
-    return sessionStorage.getItem('sdm_admin_authenticated') === 'true';
-  });
-  const [adminUsername, setAdminUsername] = useState<string | null>(() => {
-    return sessionStorage.getItem('sdm_admin_user') || (sessionStorage.getItem('sdm_admin_authenticated') === 'true' ? 'harshinilychitti' : null);
-  });
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [adminUsername, setAdminUsername] = useState<string | null>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
   const loginAdmin = (enteredUser: string, enteredPass: string): boolean => {
@@ -152,8 +148,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (cleanUser === 'harshinilychitti' && enteredPass === 'harshini@8019') {
       setIsAdmin(true);
       setAdminUsername('harshinilychitti');
-      sessionStorage.setItem('sdm_admin_authenticated', 'true');
-      sessionStorage.setItem('sdm_admin_user', 'harshinilychitti');
       return true;
     }
     return false;
@@ -162,8 +156,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logoutAdminUser = () => {
     setIsAdmin(false);
     setAdminUsername(null);
-    sessionStorage.removeItem('sdm_admin_authenticated');
-    sessionStorage.removeItem('sdm_admin_user');
     setActiveView('home');
   };
 
@@ -178,15 +170,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Optional background Firebase Auth listener
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) {
-        const isHarshini = currentUser.email === 'harshinisree72@gmail.com';
-        const isShopOwner = currentUser.email === 'sreedurgamathabookstall@gmail.com';
-        if (isHarshini || isShopOwner) {
-          setIsAdmin(true);
-        }
-      }
     });
 
     return () => unsubscribe();
