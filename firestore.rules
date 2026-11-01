@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'harshinisree72@gmail.com' ||
+        (request.auth.token.email != null && request.auth.token.email.matches('.*@gmail\\.com$') && exists(/databases/$(database)/documents/admins/$(request.auth.uid)))
+      );
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Public catalog & settings: Anyone can view, only Admin can write
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /stationery_categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /stationery_products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /fancy_categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /fancy_products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /xerox_services/{serviceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{galleryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders: Anyone (guest or user) can create an order with valid data
+    // Only Admin can list, read individual orders, update statuses, or delete
+    match /orders/{orderDocId} {
+      allow create: if request.resource.data.orderId is string &&
+                       request.resource.data.customerName is string &&
+                       request.resource.data.customerName.size() > 0 &&
+                       request.resource.data.customerName.size() <= 100 &&
+                       request.resource.data.customerMobile is string &&
+                       request.resource.data.customerMobile.size() >= 7 &&
+                       request.resource.data.customerMobile.size() <= 25;
+      allow read, list, update, delete: if isAdmin();
+    }
+
+    match /admins/{adminUid} {
+      allow read: if isSignedIn();
+      allow write: if isBootstrappedAdmin();
+    }
+  }
+}

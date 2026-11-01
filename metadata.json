@@ -1,0 +1,6 @@
+{
+  "name": "Sree Durga Mata Stationery - Book Stall & Fancy Items",
+  "description": "Sree Durga Mata Stationery - Book Stall & Fancy Items in Hyderabad. Books, school & office stationery, fancy items, Xerox & printing services, and WhatsApp ordering.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

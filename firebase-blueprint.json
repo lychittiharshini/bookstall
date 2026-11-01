@@ -1,0 +1,221 @@
+{
+  "entities": {
+    "ShopSettings": {
+      "title": "ShopSettings",
+      "description": "Store configuration, contact information, and business hours for Sri Durga Mata Stationery",
+      "type": "object",
+      "properties": {
+        "shopName": { "type": "string", "maxLength": 100 },
+        "subtitle": { "type": "string", "maxLength": 100 },
+        "address": { "type": "string", "maxLength": 250 },
+        "email": { "type": "string", "format": "email", "maxLength": 100 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "whatsapp": { "type": "string", "maxLength": 30 },
+        "openingHours": { "type": "string", "maxLength": 150 },
+        "holidays": { "type": "string", "maxLength": 150 },
+        "googleMapsUrl": { "type": "string", "maxLength": 300 },
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["shopName", "address", "phone", "whatsapp"]
+    },
+    "StationeryCategory": {
+      "title": "StationeryCategory",
+      "description": "Category for books and school/office stationery",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 80 },
+        "nameTe": { "type": "string", "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 300 },
+        "image": { "type": "string", "maxLength": 500 },
+        "displayOrder": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "isActive"]
+    },
+    "StationeryProduct": {
+      "title": "StationeryProduct",
+      "description": "Stationery item or book available at the store",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 120 },
+        "nameTe": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 500 },
+        "categoryId": { "type": "string", "maxLength": 100 },
+        "categoryName": { "type": "string", "maxLength": 100 },
+        "price": { "type": "number" },
+        "isPriceOnRequest": { "type": "boolean" },
+        "isAvailable": { "type": "boolean" },
+        "image": { "type": "string", "maxLength": 500 },
+        "variants": { "type": "string", "maxLength": 200 },
+        "displayOrder": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "categoryId", "isAvailable"]
+    },
+    "FancyCategory": {
+      "title": "FancyCategory",
+      "description": "Category for fancy items, accessories, and beauty products",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 80 },
+        "nameTe": { "type": "string", "maxLength": 80 },
+        "description": { "type": "string", "maxLength": 300 },
+        "image": { "type": "string", "maxLength": 500 },
+        "displayOrder": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "isActive"]
+    },
+    "FancyProduct": {
+      "title": "FancyProduct",
+      "description": "Fancy item, hair accessory, bindi, bangle, or jewelry",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 120 },
+        "nameTe": { "type": "string", "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 500 },
+        "categoryId": { "type": "string", "maxLength": 100 },
+        "categoryName": { "type": "string", "maxLength": 100 },
+        "price": { "type": "number" },
+        "isPriceOnRequest": { "type": "boolean" },
+        "isAvailable": { "type": "boolean" },
+        "image": { "type": "string", "maxLength": 500 },
+        "colors": { "type": "string", "maxLength": 200 },
+        "variants": { "type": "string", "maxLength": 200 },
+        "displayOrder": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "categoryId", "isAvailable"]
+    },
+    "XeroxService": {
+      "title": "XeroxService",
+      "description": "Photocopying, printing, and lamination service configuration",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 100 },
+        "nameTe": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 300 },
+        "serviceType": { "type": "string", "maxLength": 50 },
+        "colorMode": { "type": "string", "maxLength": 50 },
+        "sidedness": { "type": "string", "maxLength": 50 },
+        "price": { "type": "number" },
+        "pricingUnit": { "type": "string", "maxLength": 50 },
+        "isPriceOnRequest": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "image": { "type": "string", "maxLength": 500 },
+        "displayOrder": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["name", "isActive"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order saved before opening WhatsApp",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string", "maxLength": 50 },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "customerMobile": { "type": "string", "maxLength": 25 },
+        "preference": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "string", "maxLength": 600 },
+        "status": { "type": "string", "maxLength": 30 },
+        "totalAmount": { "type": "number" },
+        "hasUnpricedItems": { "type": "boolean" },
+        "whatsappStatus": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["orderId", "customerName", "customerMobile", "status"]
+    },
+    "GalleryItem": {
+      "title": "GalleryItem",
+      "description": "Shop photo or promotional showcase item",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "titleTe": { "type": "string", "maxLength": 100 },
+        "caption": { "type": "string", "maxLength": 300 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string", "maxLength": 50 },
+        "isFeatured": { "type": "boolean" },
+        "displayOrder": { "type": "number" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "imageUrl"]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "Festival special discount or promotion",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "titleTe": { "type": "string", "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 400 },
+        "imageUrl": { "type": "string", "maxLength": 500 },
+        "discountBadge": { "type": "string", "maxLength": 60 },
+        "startDate": { "type": "string", "maxLength": 30 },
+        "endDate": { "type": "string", "maxLength": 30 },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["title", "isActive"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized administrator account",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "maxLength": 100 },
+        "role": { "type": "string", "maxLength": 30 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": { "$ref": "ShopSettings" },
+      "description": "Store configuration and contact details"
+    },
+    "/stationery_categories/{categoryId}": {
+      "schema": { "$ref": "StationeryCategory" },
+      "description": "Categories for stationery and books"
+    },
+    "/stationery_products/{productId}": {
+      "schema": { "$ref": "StationeryProduct" },
+      "description": "Stationery and book products"
+    },
+    "/fancy_categories/{categoryId}": {
+      "schema": { "$ref": "FancyCategory" },
+      "description": "Categories for fancy items and accessories"
+    },
+    "/fancy_products/{productId}": {
+      "schema": { "$ref": "FancyProduct" },
+      "description": "Fancy items and accessories"
+    },
+    "/xerox_services/{serviceId}": {
+      "schema": { "$ref": "XeroxService" },
+      "description": "Configurable Xerox, printing, and lamination services"
+    },
+    "/orders/{orderDocId}": {
+      "schema": { "$ref": "Order" },
+      "description": "Customer orders submitted for WhatsApp fulfillment"
+    },
+    "/gallery/{galleryId}": {
+      "schema": { "$ref": "GalleryItem" },
+      "description": "Shop gallery showcase pictures"
+    },
+    "/offers/{offerId}": {
+      "schema": { "$ref": "Offer" },
+      "description": "Festival and seasonal promotional offers"
+    },
+    "/admins/{adminUid}": {
+      "schema": { "$ref": "Admin" },
+      "description": "Authorized admin users for shop management"
+    }
+  }
+}
